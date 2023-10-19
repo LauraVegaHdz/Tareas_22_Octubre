@@ -1,0 +1,71 @@
+# Laura Vega, grupo: 951, fecha de realización: 16-oct-2023
+
+import pandas as pd
+
+pacientes = {
+    "edad": [19, 28, 32, 17, 21, 30, 26, 24, 25, 33, 18, 19, 37, 20,
+             27, 38, 22, 34, 29, 40],
+    "altura": [167, 155, 175, 163, 161, 159, 170, 177, 156, 176, 154,
+               173, 172, 151, 167, 158, 168, 153, 175, 179]
+}
+
+datos = pd.DataFrame(pacientes)
+
+# Ejercicios Preprocesamiento Normalización.
+# 1. Realizar una función que normalice los datos usando
+# min-max que reciba como parámetro un DataFrame y otro
+# parámetro que sea una lista de columnas a normalizar.
+# Retornar el DataFrame con los datos normalizados.
+
+def normalizacion(datos, column_names):
+    for column_name in column_names:
+        min_valor = datos[column_name].min()
+        max_valor = datos[column_name].max()
+
+        datos[f"minmax_{column_name}"] = (datos[column_name] - min_valor) / (max_valor - min_valor)
+    # print(datos)
+
+
+
+
+# 2. Realizar una función que normalice los datos usando Z-Score que
+# reciba como parámetro un DataFrame y otro parámetro que sea una
+# lista de columnas a normalizar. Retornar el DataFrame con los datos
+# normalizados.
+
+def calculo_z_core(datos, column_names):
+    for column_name in column_names:
+        prom_altura = datos[column_name].std()
+        std_altura= datos[column_name].max()
+
+        datos["zscore_altura"] = (datos.altura - prom_altura) / std_altura
+
+        prom_edad = datos.edad.mean()
+        std_edad = datos.edad.std()
+        datos["zscore_edad"] = (datos.edad - prom_edad) / std_edad
+
+    # print(datos)
+
+
+
+
+# 3. Realizar una función que normalice los datos usando escalado simple que
+# reciba como parámetro un DataFrame y otro parámetro que sea una lista de
+# columnas a normalizar. Retornar el DataFrame con los datos normalizados.
+
+def escalado_simple(datos, column_names):
+    for column_name in column_names:
+        max_altura = datos.altura.max()
+        max_edad = datos.edad.max()
+
+        datos["es_altura"] = datos.altura / max_altura
+        datos["es_edad"] = datos.edad / max_edad
+
+    print(datos)
+
+normalizacion(datos, ["edad", "altura"])
+calculo_z_core(datos, ["edad", "altura"])
+escalado_simple(datos, ["edad", "altura"])
+
+
+
