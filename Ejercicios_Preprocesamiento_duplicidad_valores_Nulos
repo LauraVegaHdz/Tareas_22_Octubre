@@ -1,0 +1,82 @@
+import pandas as pd
+
+data = {'A': [1, 2, None, 4, 5],
+        'B': [None, 2, 3, 4, None],
+        'C': [1, 2, 3, 4, 5]}
+df = pd.DataFrame(data)
+
+# 1. Realizar una función que reciba como parámetro un DataFrame y  retorne
+# el porcentaje de valores nulos de cada columna.
+def porcentaje_valores_nulos(dataframe):
+    porcentaje_nulos = (dataframe.isnull().sum() / len(dataframe)) * 100
+    return porcentaje_nulos
+
+# 2. Realizar una función que reciba como parámetro un DataFrame y retorne
+# el número de renglones duplicados.
+def contar_renglones_duplicados(dataframe):
+    duplicados = dataframe.duplicated().sum()
+    return duplicados
+
+# 3. Realizar una función que reciba como parámetro un DataFrame y un máximo porcentaje.
+# Este debe eliminar todas las columnas que superen o igualen el máximo porcentaje de
+# valores nulos establecidos en el DataFrame Original. Retornar la lista nombres de
+# columnas eliminadas.  Validar que el porcentaje máximo esté entre 0 y 1.
+def eliminar_columnas_con_nulos(dataframe, max_porcentaje):
+    if max_porcentaje < 0 or max_porcentaje > 1:
+        raise ValueError("El porcentaje máximo debe estar entre 0 y 1")
+
+    porcentaje_nulos = porcentaje_valores_nulos(dataframe)
+    columnas_eliminar = porcentaje_nulos[porcentaje_nulos >= max_porcentaje].index.tolist()
+
+    dataframe = dataframe.drop(columns=columnas_eliminar)
+
+    return columnas_eliminar
+
+
+# 4. Realizar una función que reciba como parámetro un DataFrame, una lista con los
+# nombres de las columnas a verificar y una cadena. La cadena solo puede ser mean,
+# bfill o ffill, en caso contrario lanzar una excepción. Debe sustituir los valores
+# nulos por el método especificado y retornar el DataFrame modificado.
+def sustituir_valores_nulos(dataframe, columnas, metodo):
+    if metodo not in ['mean', 'bfill', 'ffill']:
+        raise ValueError("El método debe ser 'mean', 'bfill' o 'ffill'")
+    if metodo == 'mean':
+        dataframe[columnas] = dataframe[columnas].fillna(dataframe[columnas].mean())
+    elif metodo == 'bfill':
+        dataframe[columnas] = dataframe[columnas].bfill()
+    elif metodo == 'ffill':
+        dataframe[columnas] = dataframe[columnas].ffill()
+
+    return dataframe
+
+
+# 5. Realizar una función que reciba como parámetro un DataFrame y elimine los renglones 
+# repetidos en el DataFrame Original. Debe retornar la cantidad de renglones eliminados.
+def eliminar_renglones_duplicados(dataframe):
+    duplicados_antes = contar_renglones_duplicados(dataframe)
+    dataframe = dataframe.drop_duplicates()
+    duplicados_despues = contar_renglones_duplicados(dataframe)
+    renglones_eliminados = duplicados_antes - duplicados_despues
+
+    return renglones_eliminados
+
+porcentaje_nulos = porcentaje_valores_nulos(df)
+print("Porcentaje de valores nulos:")
+print(porcentaje_nulos)
+
+duplicados = contar_renglones_duplicados(df)
+print("\nRenglones duplicados:")
+print(duplicados)
+
+columnas_eliminadas = eliminar_columnas_con_nulos(df, 0.4)
+print("\nColumnas eliminadas:")
+print(columnas_eliminadas)
+
+# Ejercicio 4: Sustituir valores nulos en columnas especificadas
+df = sustituir_valores_nulos(df, ['A', 'B'], 'mean')
+print("\nDataFrame con valores nulos sustituidos:")
+print(df)
+
+renglones_eliminados = eliminar_renglones_duplicados(df)
+print("\nRenglones duplicados eliminados:")
+print(renglones_eliminados)
