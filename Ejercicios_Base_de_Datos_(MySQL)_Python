@@ -36,6 +36,12 @@ class MySQLConnect:
             self._connection.close()
             self._connection = None
 
+# 2.Desarrollar una clase llamada PaisMySQL que herede de  MySQLConnect. Debe agregar los atributos correspondientes de la clase padre. 
+# Debe agregar los siguientes métodos:
+# insertar(id, nombre): Método para insertar datos en la Tabla Pais, debe recibir como parámetro las columnas de la tabla y debe retornar True si se inserta el dato o False en caso contrario.
+# editar(nombre): Método para editar el nombre en la Tabla País. Validar que nombre no exista en la tabla. 
+# eliminar(id): Método para eliminar un elemento de la Tabla País. Debe tener como parámetro la llave primaria, retorna True si logró eliminarse y False en caso contrario.
+# consultar(filter): Método que recibe un filtro(cadena) y retorna una lista de tuplas con los resultados del filtro de la Tabla País. Ejemplo: “id = 1” , “nombre like %A%”
 
 class PaisMySQL(MySQLConnect):
     def insertar(self, id, nombre):
@@ -112,9 +118,150 @@ class PaisMySQL(MySQLConnect):
             return None
         finally:
             self.desconectar()
+# 3.Desarrollar una clase llamada OlimpiadaMySQL que herede de  MySQLConnect. Debe agregar los atributos correspondientes de la clase padre. 
+# Debe agregar los siguientes métodos:
+# insertar(id, year): Método para insertar datos en la Tabla Olimpiada, debe recibir como parámetro las columnas de la tabla y debe retornar True si se inserta el dato o False en caso contrario.
+# editar(year): Método para editar el año en la Tabla Olimpiada. Validar que el año no exista en la tabla. 
+# eliminar(id): Método para eliminar un elemento de la Tabla Olimpiada. Debe tener como parámetro la llave primaria, retorna True si logró eliminarse y False en caso contrario.
+# consultar(filter): Método que recibe un filtro(cadena) y retorna una lista de tuplas con los resultados del filtro de la Tabla Olimpiada. Ejemplo: “id = 1” , “year > 1990”
 
+class OlimpiadaMySQL(MySQLConnect):
+    def insertar(self, id, year):
+        try:
+            connection = self.conectar()
+            cursor = connection.cursor()
 
-# Puedes agregar las clases OlimpiadaMySQL y ResultadosMySQL siguiendo un enfoque similar.
+            cursor.execute(f"SELECT * FROM Olimpiada WHERE year = {year}")
+            result = cursor.fetchone()
+            if result:
+                return False
+
+            cursor.execute(f"INSERT INTO Olimpiada (id, year) VALUES ({id}, {year})")
+            connection.commit()
+            return True
+        except Exception as e:
+            print(f"Error al insertar olimpiada: {e}")
+            return False
+        finally:
+            self.desconectar()
+
+    def editar(self, year):
+        try:
+            connection = self.conectar()
+            cursor = connection.cursor()
+
+            cursor.execute(f"SELECT * FROM Olimpiada WHERE year = {year}")
+            result = cursor.fetchone()
+            if result:
+                return False
+
+            cursor.execute(f"UPDATE Olimpiada SET year = {year}")
+            connection.commit()
+            return True
+        except Exception as e:
+            print(f"Error al editar olimpiada: {e}")
+            return False
+        finally:
+            self.desconectar()
+
+    def eliminar(self, id):
+        try:
+            connection = self.conectar()
+            cursor = connection.cursor()
+
+            cursor.execute(f"DELETE FROM Olimpiada WHERE id = {id}")
+            connection.commit()
+            return True
+        except Exception as e:
+            print(f"Error al eliminar olimpiada: {e}")
+            return False
+        finally:
+            self.desconectar()
+
+    def consultar(self, filter):
+        try:
+            connection = self.conectar()
+            cursor = connection.cursor()
+
+            cursor.execute(f"SELECT * FROM Olimpiada WHERE {filter}")
+            result = cursor.fetchall()
+            return result
+        except Exception as e:
+            print(f"Error al consultar olimpiadas: {e}")
+            return []
+        finally:
+            self.desconectar()
+
+# 4.Desarrollar una clase llamada ResultadosMySQL que herede de  MySQLConnect. Debe agregar los atributos correspondientes de la clase padre. 
+# Debe agregar los siguientes métodos:
+# insertar(idOlimpiada, idPais, idGenero, oro, plata, bronce): Método para insertar datos en la Tabla Resultados, debe recibir como parámetro las columnas de la tabla y debe retornar True si se inserta el dato o False en caso contrario.
+# editar(oro, plata, bronce): Método para editar oro, plata, bronce en la Tabla Resultados. Validar que sean valores enteros positivos.
+# eliminar(idOlimpiada, idPais, idGenero): Método para eliminar un elemento de la Tabla Resultados. Debe tener como parámetro la llave primaria compuesta, retorna True si logró eliminarse y False en caso contrario.
+# consultar(filter): Método que recibe un filtro(cadena) y retorna una lista de tuplas con los resultados del filtro de la Tabla Resultados. Ejemplo: “idPais = 1” , “idPais = 1 and idOlimpiada=2”
+
+class ResultadosMySQL(MySQLConnect):
+    def insertar(self, idOlimpiada, idPais, idGenero, oro, plata, bronce):
+        try:
+            connection = self.conectar()
+            cursor = connection.cursor()
+
+            cursor.execute(f"INSERT INTO Resultados (idOlimpiada, idPais, idGenero, oro, plata, bronce) "
+                           f"VALUES ({idOlimpiada}, {idPais}, {idGenero}, {oro}, {plata}, {bronce})")
+            connection.commit()
+            return True
+        except Exception as e:
+            print(f"Error al insertar resultado: {e}")
+            return False
+        finally:
+            self.desconectar()
+
+    def editar(self, oro, plata, bronce):
+        try:
+            connection = self.conectar()
+            cursor = connection.cursor()
+
+            if not isinstance(oro, int) or not isinstance(plata, int) or not isinstance(bronce, int) \
+                    or oro < 0 or plata < 0 or bronce < 0:
+                return False
+
+            cursor.execute(f"UPDATE Resultados SET oro = {oro}, plata = {plata}, bronce = {bronce}")
+            connection.commit()
+            return True
+        except Exception as e:
+            print(f"Error al editar resultado: {e}")
+            return False
+        finally:
+            self.desconectar()
+
+    def eliminar(self, idOlimpiada, idPais, idGenero):
+        try:
+            connection = self.conectar()
+            cursor = connection.cursor()
+
+            cursor.execute(f"DELETE FROM Resultados WHERE idOlimpiada = {idOlimpiada} AND idPais = {idPais} "
+                           f"AND idGenero = {idGenero}")
+            connection.commit()
+            return True
+        except Exception as e:
+            print(f"Error al eliminar resultado: {e}")
+            return False
+        finally:
+            self.desconectar()
+
+    def consultar(self, filter):
+        try:
+            connection = self.conectar()
+            cursor = connection.cursor()
+
+            cursor.execute(f"SELECT * FROM Resultados WHERE {filter}")
+            result = cursor.fetchall()
+            return result
+        except Exception as e:
+            print(f"Error al consultar resultados: {e}")
+            return []
+        finally:
+            self.desconectar()
+
 
 if __name__ == "__main__":
     conexion = MySQLConnect(host="localhost", user="root", password="12345", database="olimpiadas")
@@ -133,6 +280,21 @@ if __name__ == "__main__":
     resultados = pais_manager.consultar("id = 1")
     if resultados:
         for resultado in resultados:
+            print(resultado)
+
+ resultados_manager = ResultadosMySQL(host="localhost", user="root", password="12345", database="olimpiadas")
+
+    # Ejemplo: Insertar un resultado
+    insertado_resultado = resultados_manager.insertar(1, 1, 1, 5, 3, 2)
+    if insertado_resultado:
+        print("Resultado insertado con éxito")
+    else:
+        print("Error al insertar resultado")
+
+    # Ejemplo: Consultar resultados
+    resultados_resultados = resultados_manager.consultar("idPais = 1")
+    if resultados_resultados:
+        for resultado in resultados_resultados:
             print(resultado)
 
     conexion.desconectar()
